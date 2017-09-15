@@ -1,0 +1,19 @@
+.revealer {
+  width: 710px;
+  height: 630px;
+}
+.revealer-demo {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  .revealer-demo__box {
+    margin: 50px 0;
+    &:first-child {
+      .revealer__handler {
+        width: 0px;
+        border: 0.5px dashed lightblue;
+      }
+    }
+  }
+}

@@ -5,6 +5,16 @@
     transition: width 1s, left 1s;
     transition-timing-function: ease;
   }
+  .revealer__element--hidden {
+    display: none !important;
+  }
+  .revealer__loading {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   .revealer__graphic {
     overflow: hidden;
     img {
@@ -21,6 +31,28 @@
     // background-color: black;
     z-index: 10;
     .handler__center-element {
+      &:before, &:after {
+        max-width: 15px;
+        max-height: 30px;
+        min-width: 7.5px;
+        min-height: 15px;
+        height: 25%;
+        width: 25%;
+        background: url(./img/arrow-n.svg);
+        background-size: contain;
+        background-repeat: no-repeat;
+        content: "";
+        transform: scale(1);
+      }
+      .handler__center-spacing {
+        max-width: 20px;
+        max-height: 30px;
+        height: 100%;
+        width: 15%;
+      }
+      &:after {
+        transform: scale(-1,1);
+      }
       display: flex;
       position: absolute;
       justify-content: center;

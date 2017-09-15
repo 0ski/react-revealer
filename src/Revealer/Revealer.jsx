@@ -3,55 +3,75 @@ import React, { Component } from 'react';
 require('./revealer.scss');
 
 const CSS_CLASS = 'revealer__element--transition';
+const CSS_HIDDEN_CLASS = 'revealer__element--hidden';
+
+class Deferred {
+  constructor() {
+    let _this = this;
+
+    _this.promise = new Promise((resolve, reject) => {
+        _this.resolve = resolve;
+        _this.reject = reject;
+      }
+    );
+  }
+};
 
 export default class Revealer extends Component {
   componentDidMount() {
     let _this = this;
+
+    //All tag names with src attributes
+    let tagNames = [
+      'audio',
+      'embed',
+      'iframe',
+      'img',
+      'input',
+      'script',
+      'source',
+      'track',
+      'video',
+    ];
+
+    let nodesToLoad = Array.from(_this.container.querySelectorAll(tagNames.join(',')));
+    let promises = nodesToLoad.map(node => {
+      let deferred = new Deferred();
+      node.addEventListener('load', () => deferred.resolve(node));
+      return deferred.promise;
+    });
+
+    let initialHandlerPosition = _this.props.initialHandlerPosition || 50;
     _this.mouseIsDown = false;
 
-    let deferred = () => {
-      let deferred = {};
+    Promise.all(promises).then(() => {
+      Array.from(_this.container
+              .getElementsByClassName(CSS_HIDDEN_CLASS))
+              .forEach(
+                node => node.classList.remove(CSS_HIDDEN_CLASS)
+              );
+      _this.container
+              .getElementsByClassName('revealer__loading')[0].classList.add(CSS_HIDDEN_CLASS);
 
-      deferred.promise = new Promise((resolve, reject) => {
-          deferred.resolve = resolve;
-          deferred.reject = reject;
-        }
-      );
-
-      return deferred;
-    };
-
-    let leftImageLoaded = _this.leftImageLoaded = deferred();
-    let rightImageLoaded = _this.rightImageLoaded = deferred();
-
-    _this.handlerWidth = Math.max.apply(null, Array.from(_this.handler.children)
-      .map(child => child.clientWidth)
-      .concat([_this.handler.clientWidth])
-    );
-
-    leftImageLoaded.promise.then(() => rightImageLoaded.promise).then(() => {
       let container = _this.container;
       let handler = _this.handler;
       let graphicContainers = container.getElementsByClassName('revealer__graphic');
       let leftContainer = graphicContainers[0];
       let rightContainer = graphicContainers[1];
-      let leftImage = leftContainer.firstElementChild;
-      let rightImage = rightContainer.firstElementChild;
 
       leftContainer.style.position = 'absolute';
       leftContainer.style.top = 0;
       leftContainer.style.left = 0;
-      leftContainer.style.width = '50%';
+      leftContainer.style.width = initialHandlerPosition + '%';
 
       _this.drivenContainer = leftContainer;
 
-      console.log(_this.drivenContainer);
-
-      this.resetHandler(container.clientWidth / 2);
+      _this.resetHandler(container.clientWidth * (initialHandlerPosition / 100));
     });
 
     _this.mouseUp = _this.mouseUp.bind(_this);
     _this.resize = _this.resize.bind(_this);
+    _this.touch = _this.touch.bind(_this);
 
     window.addEventListener('resize', _this.resize);
   }
@@ -60,13 +80,17 @@ export default class Revealer extends Component {
     let _this = this;
     let handler = _this.handler;
     let centerNode = handler.getElementsByClassName('handler__center-element')[0];
+    let handlerWidth = Math.max.apply(null, Array.from(_this.handler.children)
+      .map(child => child.clientWidth)
+      .concat([_this.handler.clientWidth])
+    );
 
     if (centerNode) {
       let top = 'calc(50%';
       top = top + ' - ' + (centerNode.clientHeight / 2) + 'px';
       top = top + ')';
       centerNode.style.top = top;
-      centerNode.style.left = -(_this.handlerWidth / 2) + 'px';
+      centerNode.style.left = -(handlerWidth / 2) + 'px';
     }
 
     _this.handler.style.left = width + 'px';
@@ -75,6 +99,17 @@ export default class Revealer extends Component {
   resize() {
     let _this = this;
     _this.resetHandler(Number.parseInt(_this.drivenContainer.clientWidth));
+  }
+
+  touch(e, cb) {
+    let touch = e.touches[0];
+    let evnt = {};
+
+    if (touch) {
+      evnt.clientX = touch.clientX;
+    }
+
+    return cb.bind(this)(evnt);
   }
 
   mouseDown(e) {
@@ -129,9 +164,9 @@ export default class Revealer extends Component {
       if (hotOffsetOn) {
         let hotOffset = this.container.clientWidth * (props.hotOffsetPercentage / 100);
 
-        if (orgOffset < -hotOffset && (offset < 0)) {
+        if (orgOffset < -hotOffset) {
           _this.moveToTheEnd = true;
-        } else if (orgOffset > hotOffset && (offset > 0)) {
+        } else if (orgOffset > hotOffset) {
           _this.moveToTheBeginning = true;
         } else {
           resetHotOffset = true;
@@ -159,7 +194,6 @@ export default class Revealer extends Component {
 
     let container = _this.container;
     let handler = _this.handler;
-    let handlerWidth = _this.handlerWidth;
     let drivenContainer = _this.drivenContainer;
 
     let min = 0;
@@ -203,29 +237,28 @@ export default class Revealer extends Component {
       <div
         className="revealer"
         onMouseMove={ (e) => _this.mouseMove(e) }
+        onTouchMove={ (e) => _this.touch(e, _this.mouseMove) }
         ref={ (container) => { _this.container = container; } }
       >
-        <div className="revealer__graphic revealer__element">
-          <img
-            src={ _this.props.leftSrc }
-            onLoad={ (e) => _this.leftImageLoaded.resolve() }
-          ></img>
+        <div className="revealer__loading revealer__element">Loading...</div>
+        <div className="revealer__graphic revealer__element revealer__element--hidden">
+          { _this.props.children[0] }
         </div>
         <div
-          className="revealer__handler revealer__element"
-          onMouseDown={ (e) => this.mouseDown(e) }
+          className="revealer__handler revealer__element revealer__element--hidden"
+          onMouseDown={ (e) => _this.mouseDown(e) }
           onMouseUp={ (e) => _this.mouseUp(e) }
+          onTouchStart={ (e) => _this.touch(e, _this.mouseDown) }
+          onTouchEnd={ (e) => _this.touch(e, _this.mouseUp) }
+          onTouchCancel={ (e) => _this.touch(e, _this.mouseUp) }
           ref={ (handler) => { _this.handler = handler; } }
         >
           <div className="handler__center-element">
-            &#60;&nbsp;&#62;
+            <div className="handler__center-spacing"></div>
           </div>
         </div>
-        <div className="revealer__graphic revealer__element">
-          <img
-            src={ _this.props.rightSrc }
-            onLoad={ (e) => _this.rightImageLoaded.resolve() }
-          ></img>
+        <div className="revealer__graphic revealer__element revealer__element--hidden">
+          { _this.props.children[1] }
         </div>
       </div>
     );
