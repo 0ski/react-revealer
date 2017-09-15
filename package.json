@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "./node_modules/.bin/webpack --config webpack.config.js --env production",
-    "start": "node_modules/.bin/webpack-dev-server --open --devtool source-map --output-pathinfo --history-api-fallback"
+    "start": "node_modules/.bin/webpack-dev-server --devtool source-map --output-pathinfo --history-api-fallback --host 0.0.0.0 --disableHostCheck=true"
   },
   "repository": {
     "type": "git",
@@ -31,7 +31,8 @@
     "resolve-url-loader": "^2.1.0",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.18.2",
-    "webpack": "^3.5.5"
+    "webpack": "^3.5.5",
+    "webpack-dev-server": "^2.8.2"
   },
   "dependencies": {
     "react": "^15.6.1",

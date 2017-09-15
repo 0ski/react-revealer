@@ -1,12 +1,15 @@
 .revealer {
-  width: 710px;
-  height: 630px;
+  max-width: 710px;
+  max-height: 630px;
+  width: 90vw;
+  height: 90vmin;
 }
 .revealer-demo {
   display: flex;
   flex-flow: row;
   flex-wrap: wrap;
   justify-content: space-around;
+  overflow-x: hidden;
   .revealer-demo__box {
     margin: 50px 0;
     &:first-child {
