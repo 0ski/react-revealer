@@ -86,6 +86,12 @@ ReactDOM.render(
       href='http://oskarotwinowski.com'
     >Oskar Otwinowski
     </a>
+    <br />
+    <a
+      target='_blank'
+      href='https://github.com/0ski/react-revealer'
+    >Repo
+    </a>
     <br /><br />
     Image source:<br />
     <a
