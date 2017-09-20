@@ -78,6 +78,27 @@ ReactDOM.render(
           </div>
         </Revealer>
       </div>
+      <div className='revealer-demo__box'>
+        <h2>With text and DOM nodes:</h2>
+        <Revealer
+          hotAreaPercentage={ 25 }
+          initialHandlerPosition={ 50 }
+        ><div className='text-demo text-demo--black'>
+          <h1>
+            DEMO TEXT
+            <br/><br/>
+            Hello world!
+          </h1>
+        </div>
+          <div className='text-demo text-demo--white'>
+            <h1>
+              TEKST DEMO
+              <br/><br/>
+              Witaj świecie!
+            </h1>
+          </div>
+        </Revealer>
+      </div>
     </div>
     <br /><br /><br />
     Component author:<br />

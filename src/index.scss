@@ -18,5 +18,18 @@
         border: 0.5px dashed lightblue;
       }
     }
+    .text-demo {
+      width: 710px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 630px;
+      text-align: center;
+    }
+    .text-demo--black {
+      background-color: black;
+      color: white;
+    }
   }
 }
